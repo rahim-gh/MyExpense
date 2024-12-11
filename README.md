@@ -1,10 +1,10 @@
-##MyExpense
+## MyExpense
 
 MyExpense is a simple desktop application designed to manage personal expenses. This project serves as a mini-project for TP HMI (Human-Machine Interaction), showcasing a practical implementation of JavaFX for the user interface, SQLite for data storage, and CSS for styling.
 
 ---
 
-###Technologies Used
+### Technologies Used
 
 **JavaFX**: For building the graphical user interface (GUI).
 
@@ -15,7 +15,7 @@ MyExpense is a simple desktop application designed to manage personal expenses. 
 
 ---
 
-###Purpose
+### Purpose
 
 This project was created as part of the **TP HMI coursework** to demonstrate:
 
@@ -29,7 +29,7 @@ This project was created as part of the **TP HMI coursework** to demonstrate:
 
 ---
 
-###Future Improvements
+### Future Improvements
 
 Add features like expense categories and filtering.
 
@@ -42,7 +42,8 @@ Include basic data visualization (e.g., charts).
 ---
 
 Author
-Rahim
+
+  **Rahim**
 
 ---
 
