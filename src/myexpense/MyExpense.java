@@ -40,12 +40,10 @@
 
 // }
 
-
 package myexpense;
 
-import java.sql.SQLException;
-
 import myexpense.database.DBQueries;
+import myexpense.utils.LoggerControl;
 
 /**
  * The class `MyExpense` initializes a database, inserts sample data, fetches
@@ -59,31 +57,30 @@ public class MyExpense {
      * @param args the arguments to be passed to command line
      * 
      * @return void
-     * @throws SQLException 
      */
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) {
+        LoggerControl.configureLogger();
+        LoggerControl.clearLogs();
         // Initialize database and tables
         DBQueries.createTables();
 
         // Insert a sample account
         // TODO handle multiple accounts with same email or username
-        // TODO hash passwords before inserting them into the database
         DBQueries.insertAccount("user@example.com", "testuser", "password123");
+
+        System.out.println(DBQueries.getAllAccounts());
 
         // Add a profile for the account
         // TODO handle multiple profiles with same name
-        // TODO set the account id by default by back-end
-        DBQueries.insertProfile(1, "Personal");
+        //DBQueries.insertProfile(1, "Personal");
 
         // Fetch and display profiles for the account
-        // TODO return a list or hashmap
-        DBQueries.getProfilesByAccount(1);
+        System.out.println(DBQueries.getProfilesByAccount(1));
 
         // Add a transaction for the profile
-        DBQueries.insertTransaction(1, "income", 500.0);
+        //DBQueries.insertTransaction(1, "income", 500.0);
 
         // Fetch and display transactions for the profile
-        // TODO return a list or hashmap
-        DBQueries.getTransactionsByProfile(1);
+        System.out.println(DBQueries.getTransactionsByProfile(1));
     }
 }
