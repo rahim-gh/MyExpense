@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import myexpense.utils.ExceptionControl.DuplicateException;
 import myexpense.utils.LoggerControl;
 import myexpense.utils.PasswordHasher;
 
@@ -83,8 +84,9 @@ public class DBQueries {
      * @param password Hashed password address of the account to be inserted
      *                 into the database.
      * @return Returns the ID of the created account. -1 in failure.
+     * @throws DuplicateException
      */
-    public static int insertAccount(String email, String username, String password) {
+    public static int insertAccount(String email, String username, String password) throws DuplicateException {
         String checkSql = "SELECT account_id FROM Accounts WHERE email = ? OR username = ?";
         String insertSql = "INSERT INTO Accounts (email, username, password_hash) VALUES (?, ?, ?)";
 
@@ -98,8 +100,9 @@ public class DBQueries {
 
             try (ResultSet rs = checkStmt.executeQuery()) {
                 if (rs.next()) {
-                    LoggerControl.logMessage("Duplicate entry detected for email or username.", Level.INFO);
-                    return -1; // Duplicate detected
+                    LoggerControl.logMessage("Insertion new account: Duplicate entry detected for email or username",
+                            Level.INFO);
+                    throw new DuplicateException("Duplicate entry detected for email or username");
                 }
             }
 
@@ -114,20 +117,21 @@ public class DBQueries {
                 try (ResultSet generatedKeys = insertStmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         // Return the newly generated account ID
-                        LoggerControl.logMessage("Account ID generated.", Level.FINE);
-                        return generatedKeys.getInt(1);
+                        int accountId = generatedKeys.getInt(1);
+                        LoggerControl.logMessage("Account created successfully with ID: " + accountId, Level.FINE);
+                        return accountId;
                     }
                 }
-                LoggerControl.logMessage("No ID obtained from auto-increment.", Level.INFO);
+                LoggerControl.logMessage("Insert successful, but no ID obtained.", Level.FINE);
             } else {
                 LoggerControl.logMessage("Insert failed, no rows affected.", Level.WARNING);
             }
 
         } catch (SQLException e) {
-            LoggerControl.logMessage("Database error: " + e.getMessage(), Level.SEVERE);
+            LoggerControl.logMessage("Insertion account failed: " + e.getMessage(), Level.SEVERE);
         }
 
-        // Return -1 in case of error or duplication
+        // Return -1 in case of error
         return -1;
     }
 
@@ -142,8 +146,9 @@ public class DBQueries {
      *                    database.
      * @return Returns the profile ID associated with the account ID. in
      *         duplications returns the ID. in failure cases return -1.
+     * @throws DuplicateException
      */
-    public static int insertProfile(int accountId, String profileName) {
+    public static int insertProfile(int accountId, String profileName) throws DuplicateException {
         String checkSql = "SELECT profile_id FROM Profiles WHERE account_id = ? AND profile_name = ?";
         String insertSql = "INSERT INTO Profiles (account_id, profile_name) VALUES (?, ?)";
 
@@ -155,8 +160,8 @@ public class DBQueries {
 
                 try (ResultSet rs = checkStmt.executeQuery()) {
                     if (rs.next()) {
-                        // Return the existing profile's ID if it already exists
-                        return rs.getInt("profile_id");
+                        LoggerControl.logMessage("Insertion new profile: Duplicate profile name", Level.INFO);
+                        throw new DuplicateException("Insertion new profile: Duplicate profile name");
                     }
                 }
             } catch (SQLException e) {

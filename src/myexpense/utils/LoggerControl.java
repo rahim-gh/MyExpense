@@ -44,10 +44,10 @@ public class LoggerControl {
             logger.addHandler(fileHandler);
 
             // Set log level to INFO (or any other level you prefer)
-            logger.setLevel(Level.WARNING);
+            //logger.setLevel(Level.WARNING);
 
         } catch (IOException e) {
-            System.err.println("Error setting up file logger: " + e.getMessage());
+            logger.severe("Error setting up file logger: " + e.getMessage());
         }
     }
 
@@ -115,7 +115,7 @@ public class LoggerControl {
                     try {
                         // Clear the log file by truncating its content
                         Files.write(file, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
-                        logger.info("Cleared log file: " + file.getFileName());
+                        logger.fine("Cleared log file: " + file.getFileName());
                     } catch (IOException e) {
                         logger.warning("Error clearing log file: " + file.getFileName() + " - " + e.getMessage());
                     }

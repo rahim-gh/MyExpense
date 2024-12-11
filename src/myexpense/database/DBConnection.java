@@ -32,7 +32,7 @@ public class DBConnection {
         if (instance == null || isConnectionClosed()) { // Check if instance is null or closed
             try {
                 instance = DriverManager.getConnection(URL);
-                LoggerControl.logMessage("Connected to database", Level.INFO);
+                LoggerControl.logMessage("Connected to database", Level.FINEST);
             } catch (SQLException e) {
                 LoggerControl.logMessage("Error initializing connection: " + e.getMessage(), Level.SEVERE);
                 instance = null; // Set instance to null if connection fails
