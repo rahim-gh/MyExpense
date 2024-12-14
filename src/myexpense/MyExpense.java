@@ -18,7 +18,6 @@ public class MyExpense {
      * displays profiles and transactions.
      * 
      * @param args the arguments to be passed to command line
-     * @throws DuplicateException
      */
     public static void main(String[] args) {
         /* Init logging */

@@ -46,7 +46,7 @@ public class DBConnection {
      * 
      * @return true if the connection is closed, false otherwise.
      */
-    public static boolean isConnectionClosed() {
+    protected static boolean isConnectionClosed() {
         try {
             return instance == null || instance.isClosed();
         } catch (SQLException e) {

@@ -144,8 +144,8 @@ public class DBQueries {
      * @param profileName The `profileName` parameter is a String that represents
      *                    the name of the profile that you want to insert into the
      *                    database.
-     * @return Returns the profile ID associated with the account ID. in
-     *         duplications returns the ID. in failure cases return -1.
+     * @return Returns the profile ID associated with the account ID. in failure
+     *         cases return -1.
      * @throws DuplicateException
      */
     public static int insertProfile(int accountId, String profileName) throws DuplicateException {
