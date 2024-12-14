@@ -138,4 +138,40 @@ public class InformationsControl {
         double totalExpense = calculateYearlyExpense(accountId, profileId);
         return totalIncome - totalExpense;
     }
+
+    // Method to calculate total income for all time
+    public static double calculateTotalIncome(int accountId, int profileId) {
+        double totalIncome = 0.0;
+        List<Map<String, Object>> transactions = DBQueries.getTransactionsByProfile(accountId, profileId);
+
+        for (Map<String, Object> transaction : transactions) {
+            String transactionType = (String) transaction.get("transaction_type");
+            if ("income".equalsIgnoreCase(transactionType)) {
+                totalIncome += (double) transaction.get("amount");
+            }
+        }
+        return totalIncome;
+    }
+
+    // Method to calculate total expense for all time
+    public static double calculateTotalExpense(int accountId, int profileId) {
+        double totalExpense = 0.0;
+        List<Map<String, Object>> transactions = DBQueries.getTransactionsByProfile(accountId, profileId);
+
+        for (Map<String, Object> transaction : transactions) {
+            String transactionType = (String) transaction.get("transaction_type");
+            if ("expense".equalsIgnoreCase(transactionType)) {
+                totalExpense += (double) transaction.get("amount");
+            }
+        }
+        return totalExpense;
+    }
+
+    // Method to calculate total balance for all time
+    public static double calculateTotalBalance(int accountId, int profileId) {
+        double totalIncome = calculateTotalIncome(accountId, profileId);
+        double totalExpense = calculateTotalExpense(accountId, profileId);
+        return totalIncome - totalExpense;
+    }
+
 }
