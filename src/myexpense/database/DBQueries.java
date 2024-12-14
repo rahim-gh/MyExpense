@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import javax.naming.AuthenticationException;
+
 import myexpense.utils.ExceptionControl.DuplicateException;
 import myexpense.utils.LoggerControl;
 import myexpense.utils.PasswordHasher;
@@ -35,7 +37,6 @@ public class DBQueries {
         String createAccountsTable = """
                     CREATE TABLE IF NOT EXISTS Accounts (
                         account_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        email TEXT NOT NULL UNIQUE,
                         username TEXT NOT NULL UNIQUE,
                         password_hash TEXT NOT NULL,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -58,6 +59,7 @@ public class DBQueries {
                         profile_id INTEGER NOT NULL,
                         transaction_type TEXT CHECK(transaction_type IN ('income', 'expense')) NOT NULL,
                         amount DECIMAL(10, 2) NOT NULL,
+                        comment TEXT NULL,
                         transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         FOREIGN KEY (profile_id) REFERENCES Profiles (profile_id) ON DELETE CASCADE
                     );
@@ -77,39 +79,41 @@ public class DBQueries {
      * The `insertAccount` function inserts a new account record into a database
      * table with the provided email, username, and password hash values.
      * 
-     * @param email    Email address of the account to be inserted into the
-     *                 database.
      * @param username Username of the account to be inserted into the
      *                 database.
      * @param password Hashed password address of the account to be inserted
      *                 into the database.
      * @return Returns the ID of the created account. -1 in failure.
-     * @throws DuplicateException
+     * @throws AuthenticationException
      */
-    public static int insertAccount(String email, String username, String password) throws DuplicateException {
-        String checkSql = "SELECT account_id FROM Accounts WHERE email = ? OR username = ?";
-        String insertSql = "INSERT INTO Accounts (email, username, password_hash) VALUES (?, ?, ?)";
+    public static int insertAccount(String username, String password)
+            throws ArithmeticException, AuthenticationException {
+        String checkSql = "SELECT account_id FROM Accounts WHERE username = ?";
+        String insertSql = "INSERT INTO Accounts (username, password_hash) VALUES (?, ?)";
 
         try (Connection conn = DBConnection.getInstance();
                 PreparedStatement checkStmt = conn.prepareStatement(checkSql);
                 PreparedStatement insertStmt = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
 
-            // Check for duplicate entries
-            checkStmt.setString(1, email);
-            checkStmt.setString(2, username);
+            checkStmt.setString(1, username);
 
             try (ResultSet rs = checkStmt.executeQuery()) {
                 if (rs.next()) {
-                    LoggerControl.logMessage("Insertion new account: Duplicate entry detected for email or username",
-                            Level.INFO);
-                    throw new DuplicateException("Duplicate entry detected for email or username");
+                    int accountId = rs.getInt(1);
+                    String passwordHash = rs.getString(3);
+
+                    if (PasswordHasher.hashPassword(password).equals(passwordHash)) {
+                        return accountId;
+                    } else {
+                        LoggerControl.logMessage("Insert account: wrong pasword.", Level.WARNING);
+                        throw new AuthenticationException("Wrong password!");
+                    }
                 }
             }
 
             // Insert the new account
-            insertStmt.setString(1, email);
-            insertStmt.setString(2, username);
-            insertStmt.setString(3, PasswordHasher.hashPassword(password));
+            insertStmt.setString(1, username);
+            insertStmt.setString(2, PasswordHasher.hashPassword(password));
 
             int affectedRows = insertStmt.executeUpdate();
 
@@ -197,6 +201,7 @@ public class DBQueries {
      * The `insertTransaction` function inserts a new transaction into a database
      * table and returns the generated transaction ID if successful.
      * 
+     * @param accountId       the account id
      * @param profileId       The `profileId` parameter in the `insertTransaction`
      *                        method represents the ID of the user profile for which
      *                        the transaction is being inserted. This ID is used to
@@ -220,14 +225,17 @@ public class DBQueries {
      *         successfully. If the insertion failed or encountered an error, it
      *         returns -1.
      */
-    public static int insertTransaction(int profileId, String transactionType, double amount) {
-        String sql = "INSERT INTO Transactions (profile_id, transaction_type, amount) VALUES (?, ?, ?)";
+    public static int insertTransaction(int accountId, int profileId, String transactionType, double amount,
+            String comment) {
+        String sql = "INSERT INTO Transactions (account_id, profile_id, transaction_type, amount, comment) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getInstance();
                 PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setInt(1, profileId);
-            pstmt.setString(2, transactionType);
-            pstmt.setDouble(3, amount);
+            pstmt.setInt(1, accountId);
+            pstmt.setInt(2, profileId);
+            pstmt.setString(3, transactionType);
+            pstmt.setDouble(4, amount);
+            pstmt.setString(5, comment);
 
             int affectedRows = pstmt.executeUpdate();
 
@@ -253,25 +261,71 @@ public class DBQueries {
     }
 
     /**
-     * The function retrieves a list of transactions based on a given profile ID
-     * from a database table.
+     * The `removeTransaction` function deletes a transaction from the database
+     * based on the provided transaction ID.
      * 
-     * @param profileId The `getTransactionsByProfile` method retrieves a list of
-     *                  transactions associated with a specific profile ID from a
-     *                  database. The method constructs a SQL query to select
-     *                  transactions based on the provided `profileId`. It then
-     *                  executes the query, retrieves the results, and populates a
-     *                  list of maps where each map
-     * @return This method returns a list of transactions represented as maps, where
-     *         each map contains information about a transaction such as profile_id,
-     *         transaction_id, transaction_type, amount, and transaction_date.
+     * @param transactionId The ID of the transaction to be removed.
+     * @return true if the transaction was successfully removed, false otherwise.
      */
-    public static List<Map<String, Object>> getTransactionsByProfile(int profileId) {
+    public static boolean removeTransaction(int accountId, int profileId, int transactionId) {
+        String sql = "DELETE FROM Transactions WHERE account_id = ? AND profile_id = ? AND transaction_id = ?";
+        try (Connection conn = DBConnection.getInstance();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, accountId);
+            pstmt.setInt(2, profileId);
+            pstmt.setInt(3, transactionId);
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            LoggerControl.logMessage("Error removing transaction: " + e.getMessage(), Level.WARNING);
+            return false;
+        }
+    }
+
+    /**
+     * The `updateTransaction` function updates an existing transaction in the
+     * database
+     * with new values based on the provided transaction ID.
+     * 
+     * @param transactionId   The ID of the transaction to be updated.
+     * @param transactionType The new type of transaction (income or expense).
+     * @param amount          The new amount for the transaction.
+     * @param comment         The new comment for the transaction.
+     * @return true if the transaction was successfully updated, false otherwise.
+     */
+    public static boolean updateTransaction(int accountId, int profileId, int transactionId, String transactionType,
+            double amount, String comment) {
+        String sql = "UPDATE Transactions SET transaction_type = ?, amount = ?, comment = ? WHERE transaction_id = ? AND account_id = ? AND profile_id = ?";
+        try (Connection conn = DBConnection.getInstance();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, transactionType);
+            pstmt.setDouble(2, amount);
+            pstmt.setString(3, comment);
+            pstmt.setInt(4, transactionId);
+            pstmt.setInt(5, accountId);
+            pstmt.setInt(6, profileId);
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            LoggerControl.logMessage("Error updating transaction: " + e.getMessage(), Level.WARNING);
+            return false;
+        }
+    }
+
+    /**
+     * return all transaction related to specific profile and account
+     * 
+     * @param accountId the target account id
+     * @param profileId the target profile id
+     * @return return a list of transactions
+     */
+    public static List<Map<String, Object>> getTransactionsByProfile(int accountId, int profileId) {
         List<Map<String, Object>> transactionsList = new ArrayList<>();
-        String sql = "SELECT * FROM Transactions WHERE profile_id = ?";
+        String sql = "SELECT * FROM Transactions WHERE account_id = ? AND profile_id = ?";
 
         try (Connection conn = DBConnection.getInstance(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, profileId);
+            pstmt.setInt(1, accountId);
+            pstmt.setInt(2, profileId);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -340,14 +394,13 @@ public class DBQueries {
      */
     public static List<Map<String, Object>> getAllAccounts() {
         List<Map<String, Object>> accountsList = new ArrayList<>();
-        String sql = "SELECT account_id, email, username, created_at FROM Accounts";
+        String sql = "SELECT account_id, username, created_at FROM Accounts";
 
         try (Connection conn = DBConnection.getInstance(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> accountMap = new HashMap<>();
                     accountMap.put("account_id", rs.getInt("account_id"));
-                    accountMap.put("email", rs.getString("email"));
                     accountMap.put("username", rs.getString("username"));
                     accountMap.put("created_at", rs.getTimestamp("created_at"));
 

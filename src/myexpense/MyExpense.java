@@ -22,31 +22,10 @@ public class MyExpense {
     public static void main(String[] args) {
         /* Init logging */
         LoggerControl.configureLogger();
-        LoggerControl.clearLogs();
 
         /* Init DataBase */
         DBQueries.createTables();
 
-        /*
-         * try {
-         * DBQueries.insertAccount("user@example.com", "testuser", "password123");
-         * } catch (DuplicateException e) {
-         * System.out.println("Caught duplicate account");
-         * }
-         */
-
-        System.out.println(DBQueries.getAllAccounts());
-
-        try {
-            DBQueries.insertProfile(1, "Personal");
-        } catch (DuplicateException e) {
-            System.out.println("Caught duplicate profile");
-        }
-
-        System.out.println(DBQueries.getProfilesByAccount(1));
-
-        // DBQueries.insertTransaction(1, "income", 500.0);
-
-        // System.out.println(DBQueries.getTransactionsByProfile(1));
+        
     }
 }
