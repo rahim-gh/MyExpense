@@ -14,11 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import javax.naming.AuthenticationException;
-
 import myexpense.utils.ExceptionControl.DuplicateException;
 import myexpense.utils.LoggerControl;
-import myexpense.utils.PasswordHasher;
 
 /**
  * The `DBQueries` class contains methods to create database tables for
@@ -75,68 +72,64 @@ public class DBQueries {
         }
     }
 
-    /**
-     * The `insertAccount` function inserts a new account record into a database
-     * table with the provided email, username, and password hash values.
-     * 
-     * @param username Username of the account to be inserted into the
-     *                 database.
-     * @param password Hashed password address of the account to be inserted
-     *                 into the database.
-     * @return Returns the ID of the created account. -1 in failure.
-     * @throws AuthenticationException
-     */
-    public static int insertAccount(String username, String password)
-            throws ArithmeticException, AuthenticationException {
-        String checkSql = "SELECT account_id FROM Accounts WHERE username = ?";
+    public static int insertAccount(String username, String hashedPassword) {
         String insertSql = "INSERT INTO Accounts (username, password_hash) VALUES (?, ?)";
-
         try (Connection conn = DBConnection.getInstance();
-                PreparedStatement checkStmt = conn.prepareStatement(checkSql);
-                PreparedStatement insertStmt = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement pstmt = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
 
-            checkStmt.setString(1, username);
+            pstmt.setString(1, username);
+            pstmt.setString(2, hashedPassword);
 
-            try (ResultSet rs = checkStmt.executeQuery()) {
-                if (rs.next()) {
-                    int accountId = rs.getInt(1);
-                    String passwordHash = rs.getString(3);
-
-                    if (PasswordHasher.hashPassword(password).equals(passwordHash)) {
-                        return accountId;
-                    } else {
-                        LoggerControl.logMessage("Insert account: wrong pasword.", Level.WARNING);
-                        throw new AuthenticationException("Wrong password!");
-                    }
-                }
-            }
-
-            // Insert the new account
-            insertStmt.setString(1, username);
-            insertStmt.setString(2, PasswordHasher.hashPassword(password));
-
-            int affectedRows = insertStmt.executeUpdate();
-
+            int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
-                try (ResultSet generatedKeys = insertStmt.getGeneratedKeys()) {
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        // Return the newly generated account ID
                         int accountId = generatedKeys.getInt(1);
                         LoggerControl.logMessage("Account created successfully with ID: " + accountId, Level.FINE);
                         return accountId;
                     }
                 }
-                LoggerControl.logMessage("Insert successful, but no ID obtained.", Level.FINE);
-            } else {
-                LoggerControl.logMessage("Insert failed, no rows affected.", Level.WARNING);
             }
-
         } catch (SQLException e) {
-            LoggerControl.logMessage("Insertion account failed: " + e.getMessage(), Level.SEVERE);
+            LoggerControl.logMessage("Error inserting account: " + e.getMessage(), Level.SEVERE);
         }
+        return -1; // Account creation failed
+    }
 
-        // Return -1 in case of error
-        return -1;
+    public static Integer checkAccount(String username) {
+        String sql = "SELECT account_id FROM Accounts WHERE username = ?";
+        try (Connection conn = DBConnection.getInstance();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, username);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("account_id");
+                }
+            }
+        } catch (SQLException e) {
+            LoggerControl.logMessage("Error checking account: " + e.getMessage(), Level.INFO);
+        }
+        return null; // Username not found
+    }
+
+    public static String getPasswordHash(int accountId) {
+        String sql = "SELECT password_hash FROM Accounts WHERE account_id = ?";
+        try (Connection conn = DBConnection.getInstance();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, accountId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("password_hash");
+                }
+            }
+        } catch (SQLException e) {
+            LoggerControl.logMessage("Error fetching password hash: " + e.getMessage(), Level.SEVERE);
+        }
+        return null; // Account not found or error
     }
 
     /**

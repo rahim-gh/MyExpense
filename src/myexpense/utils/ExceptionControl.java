@@ -29,8 +29,8 @@ public class ExceptionControl {
      * It extends the `Exception` class and provides a constructor for 
      * custom error messages.
      */
-    public static class AuthenticationException extends Exception {
-        public AuthenticationException(String message) {
+    public static class NotFoundException extends Exception {
+        public NotFoundException(String message) {
             super(message);
         }
     }

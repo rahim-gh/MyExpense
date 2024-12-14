@@ -1,0 +1,45 @@
+/* Background for the login layout */
+.login-layout {
+  -fx-background-color: #f9f9f9;
+  -fx-border-color: #dcdcdc;
+  -fx-border-width: 1;
+  -fx-border-radius: 10;
+  -fx-padding: 20;
+  -fx-background-radius: 10;
+  -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 10, 0, 0, 5);
+}
+
+/* Styling for the input fields */
+.input-field {
+  -fx-font-size: 14px;
+  -fx-padding: 10;
+  -fx-border-color: #cccccc;
+  -fx-border-radius: 5;
+  -fx-background-radius: 5;
+  -fx-background-color: #ffffff;
+}
+
+/* Styling for the login button */
+.login-button {
+  -fx-font-size: 16px;
+  -fx-font-weight: bold;
+  -fx-text-fill: #ffffff;
+  -fx-background-color: #0078d7;
+  -fx-padding: 10;
+  -fx-border-radius: 5;
+  -fx-background-radius: 5;
+}
+
+.login-button:hover {
+  -fx-background-color: #005a9e;
+}
+
+.login-button:pressed {
+  -fx-background-color: #003865;
+}
+
+/* Styling for the message label */
+.message-label {
+  -fx-font-size: 14px;
+  -fx-font-weight: bold;
+}

@@ -6,6 +6,14 @@
     "configurations": [
         {
             "type": "java",
+            "name": "MyExpenseLogin",
+            "request": "launch",
+            "mainClass": "myexpense.UI.MyExpenseLogin",
+            "projectName": "MyExpense_dbb78478",
+            "vmArgs": "--module-path /home/rahim/sdk/javafx-sdk-23.0.1/lib --add-modules javafx.controls,javafx.fxml"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}",

@@ -1,11 +1,7 @@
-/**
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package myexpense;
 
+import myexpense.UI.Login;
 import myexpense.database.DBQueries;
-import myexpense.utils.ExceptionControl.DuplicateException;
 import myexpense.utils.LoggerControl;
 
 /**
@@ -26,6 +22,7 @@ public class MyExpense {
         /* Init DataBase */
         DBQueries.createTables();
 
-        
+        // Launch the Login window
+        Login.launch(args);
     }
 }
