@@ -3,6 +3,8 @@
  */
 package myexpense.logic;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +35,32 @@ public class TransactionControl {
         return transaction;
     }
 
-    public List<Map<String, Object>> getAllById(int accountId, int profileId) {
-        return DBQueries.getTransactionsByProfile(accountId, profileId);
+    // Method to retrieve all transactions by accountId and profileId with optional
+    // date filtering
+    public List<Map<String, Object>> getAllById(int accountId, int profileId, LocalDate startDate, LocalDate endDate) {
+        List<Map<String, Object>> transactions = DBQueries.getTransactionsByProfile(accountId, profileId);
+
+        // If both startDate and endDate are null, return all transactions
+        if (startDate == null && endDate == null) {
+            return transactions;
+        }
+
+        // Filter transactions by date
+        List<Map<String, Object>> filteredTransactions = new ArrayList<>();
+        for (Map<String, Object> transaction : transactions) {
+            LocalDate transactionDate = ((java.sql.Timestamp) transaction.get("transaction_date")).toLocalDateTime()
+                    .toLocalDate();
+
+            boolean isAfterStartDate = (startDate == null || !transactionDate.isBefore(startDate));
+            boolean isBeforeEndDate = (endDate == null || !transactionDate.isAfter(endDate));
+
+            // Add the transaction if it meets the date filtering conditions
+            if (isAfterStartDate && isBeforeEndDate) {
+                filteredTransactions.add(transaction);
+            }
+        }
+
+        return filteredTransactions;
     }
+
 }
