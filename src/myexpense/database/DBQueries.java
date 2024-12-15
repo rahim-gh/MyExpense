@@ -113,7 +113,7 @@ public class DBQueries {
         }
         return null; // Username not found
     }
-    
+
     public static String getPasswordHash(int accountId) {
         String sql = "SELECT password_hash FROM Accounts WHERE account_id = ?";
         try (Connection conn = DBConnection.getInstance();
@@ -407,6 +407,4 @@ public class DBQueries {
         LoggerControl.logMessage("Accounts fetched successfully.", Level.FINE);
         return accountsList;
     }
-
-    // TODO add more
 }

@@ -21,4 +21,6 @@ public class MyExpense {
         /* Init DataBase */
         DBQueries.createTables();
     }
+
+    // TODO: link frontend and backend
 }

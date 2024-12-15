@@ -25,7 +25,7 @@ public class DBConnection {
     /**
      * The getInstance method returns a Connection instance, creating one if it
      * doesn't already exist or if the previous connection is closed.
-     * 
+     *
      * @return A `Connection` object if successful, or null if an error occurs.
      */
     public static Connection getInstance() {
@@ -46,7 +46,7 @@ public class DBConnection {
      * 
      * @return true if the connection is closed, false otherwise.
      */
-    protected static boolean isConnectionClosed() {
+    private static boolean isConnectionClosed() {
         try {
             return instance == null || instance.isClosed();
         } catch (SQLException e) {

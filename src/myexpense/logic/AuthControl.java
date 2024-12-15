@@ -10,12 +10,11 @@ import myexpense.utils.PasswordHasher;
 
 public class AuthControl {
 
-    // Regex patterns for validation
+    // 5-15 characters, alphanumeric and underscores    
     private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_]{5,15}$");
-    // 5-15 characters, alphanumeric and underscores
-    private static final Pattern PASSWORD_PATTERN = Pattern
-            .compile("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,20}$");
+
     // 8-20 characters, at least 1 uppercase, 1 lowercase, 1 digit
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,20}$");
 
     // Method to validate username
     private static boolean isValidUsername(String username) {
