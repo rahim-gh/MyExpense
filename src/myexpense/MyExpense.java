@@ -1,26 +1,33 @@
 package myexpense;
 
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import myexpense.database.DBQueries;
 import myexpense.utils.LoggerControl;
 
-/**
- * The class `MyExpense` initializes a database, inserts sample data, fetches
- * and displays profiles and transactions for an account.
- */
-public class MyExpense {
-    /**
-     * The main function initializes a database, inserts sample data, fetches and
-     * displays profiles and transactions.
-     * 
-     * @param args the arguments to be passed to command line
-     */
-    public static void main(String[] args) {
-        /* Init logging */
-        LoggerControl.configureLogger();
+public class MyExpense extends Application {
+    @Override
+    public void start(Stage stage) throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("/myexpense/ui/loginWindow.fxml"));
 
-        /* Init DataBase */
-        DBQueries.createTables();
+        Scene scene = new Scene(root);
+
+        stage.setScene(scene);
+        stage.setTitle("MyExpense - Login");
+        stage.show();
     }
 
-    // TODO: link frontend and backend
+    public static void main(String[] args) {
+        // Init logging
+        LoggerControl.configureLogger();
+
+        // Init Database
+        DBQueries.createTables();
+
+        // Launch JavaFX
+        launch(args);
+    }
 }
