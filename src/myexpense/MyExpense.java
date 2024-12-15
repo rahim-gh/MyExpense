@@ -1,6 +1,5 @@
 package myexpense;
 
-import myexpense.UI.Login;
 import myexpense.database.DBQueries;
 import myexpense.utils.LoggerControl;
 
@@ -21,8 +20,5 @@ public class MyExpense {
 
         /* Init DataBase */
         DBQueries.createTables();
-
-        // Launch the Login window
-        Login.launch(args);
     }
 }
