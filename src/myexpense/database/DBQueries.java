@@ -220,15 +220,14 @@ public class DBQueries {
      */
     public static int insertTransaction(int accountId, int profileId, String transactionType, double amount,
             String comment) {
-        String sql = "INSERT INTO Transactions (account_id, profile_id, transaction_type, amount, comment) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Transactions (profile_id, transaction_type, amount, comment) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getInstance();
                 PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setInt(1, accountId);
-            pstmt.setInt(2, profileId);
-            pstmt.setString(3, transactionType);
-            pstmt.setDouble(4, amount);
-            pstmt.setString(5, comment);
+            pstmt.setInt(1, profileId);
+            pstmt.setString(2, transactionType);
+            pstmt.setDouble(3, amount);
+            pstmt.setString(4, comment);
 
             int affectedRows = pstmt.executeUpdate();
 
@@ -314,11 +313,11 @@ public class DBQueries {
      */
     public static List<Map<String, Object>> getTransactionsByProfile(int accountId, int profileId) {
         List<Map<String, Object>> transactionsList = new ArrayList<>();
-        String sql = "SELECT * FROM Transactions WHERE account_id = ? AND profile_id = ?";
+        String sql = "SELECT * FROM Transactions WHERE profile_id = ?";
 
         try (Connection conn = DBConnection.getInstance(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, accountId);
-            pstmt.setInt(2, profileId);
+
+            pstmt.setInt(1, profileId);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {

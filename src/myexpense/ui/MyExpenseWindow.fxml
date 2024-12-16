@@ -11,9 +11,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="721.0" prefWidth="888.0"
-   xmlns="http://javafx.com/javafx/23.0.1"
-   xmlns:fx="http://javafx.com/fxml/1" fx:controller="myexpense.ui.MyFunctions">
+<HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="721.0" prefWidth="888.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="myexpense.ui.MyFunctions">
    <padding>
       <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
    </padding>
@@ -103,7 +101,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </HBox>
-                  <Button fx:id="addTransactionButton" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#addTransactionAction" prefHeight="30.0" prefWidth="30.0" text="+" textFill="#0076ff">
+                  <Button fx:id="addTransactionButton" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#addTransactionAction" prefHeight="30.0" prefWidth="30.0" text="add">
                      <font>
                         <Font name="Cambria" size="18.0" />
                      </font>

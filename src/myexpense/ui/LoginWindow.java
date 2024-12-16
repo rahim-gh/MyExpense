@@ -17,6 +17,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 import myexpense.logic.AuthControl;
 import myexpense.utils.ExceptionControl.AuthException;
 import myexpense.utils.ExceptionControl.NotFoundException;
@@ -38,7 +39,7 @@ public class LoginWindow implements Initializable {
     private Button loginButton;
 
     @FXML
-    private int loginAction(ActionEvent event) throws AuthException {
+    private void loginAction(ActionEvent event) throws AuthException {
         String username = usernameTextField.getText().strip();
         String password = passwordPasswordField.getText().strip();
 
@@ -49,24 +50,28 @@ public class LoginWindow implements Initializable {
                 // Successful login, load main window
                 MyFunctions.loadMyExpense(accountId);
                 LoggerControl.logMessage("Successful login", Level.FINE);
-                return accountId; // Successful login, no feedback required
+                Stage stage = (Stage) loginButton.getScene().getWindow();
+                stage.close();
+                return; // Successful login, no feedback required
             } else {
                 // Password not correct
                 feedbackLabel.setTextFill(javafx.scene.paint.Color.RED);
                 feedbackLabel.setText("Invalid username or password");
-                return -1;
+                return;
             }
 
         } catch (NotFoundException e) {
             try {
-                Optional<ButtonType> respond = AuthControl
+                Optional respond = AuthControl
                         .showConfirmPopup("You're about to create a new account, proceed?");
                 if (respond.isPresent() && respond.get() == ButtonType.OK) {
                     // User confirmed to proceed
                     int newAccountId = AuthControl.register(username, password);
                     MyFunctions.loadMyExpense(newAccountId);
                     LoggerControl.logMessage("User confirmed to proceed", Level.FINE);
-                    return newAccountId;
+                    Stage stage = (Stage) loginButton.getScene().getWindow();
+                    stage.close();
+                    return;
                 } else {
                     // User cancelled
                     feedbackLabel.setTextFill(javafx.scene.paint.Color.ORANGE);
@@ -77,7 +82,7 @@ public class LoginWindow implements Initializable {
                 // Registration failed due to invalid input
                 feedbackLabel.setTextFill(javafx.scene.paint.Color.RED);
                 feedbackLabel.setText(eIllegalArgument.getMessage());
-                return -1;
+                return;
             }
         }
     }

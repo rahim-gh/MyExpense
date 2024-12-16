@@ -13,7 +13,7 @@ import myexpense.database.DBQueries;
 
 public class TransactionControl {
     // Method to insert a transaction
-    public int insert(int accountId, int profileId, double amount, String type, String comment) {
+    public static int insert(int accountId, int profileId, double amount, String type, String comment) {
         return DBQueries.insertTransaction(accountId, profileId, type, amount, comment);
     }
 
